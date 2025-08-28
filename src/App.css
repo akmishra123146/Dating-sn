@@ -1,0 +1,197 @@
+:root {
+  --themeColor: #000000;
+}
+
+@font-face {
+  font-family: 'Poppins-Black';
+  src: url('./assets/fonts/Poppins-Black.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins-Medium';
+  src: url('./assets/fonts/Poppins-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins-Regular';
+  src: url('./assets/fonts/Poppins-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins-Bold';
+  src: url('./assets/fonts/Poppins-Bold.ttf') format('truetype');
+}
+
+#title {
+  font-family: 'Poppins-Black';
+  font-size: 30px;
+}
+
+#subtitle {
+  font-family: 'Poppins-Medium';
+}
+
+#modal-title {
+  font-family: 'Poppins-Bold';
+}
+
+::placeholder {
+  font-family: 'Poppins-Regular';
+  position: relative;
+  left: 5px;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 85vh;
+}
+
+.login-form-item {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* Sidebar Styling Start */
+
+.ant-menu-item:hover {
+  background-color: var(--themeColor) !important;
+  color: white !important;
+}
+
+.ant-menu-item-selected {
+  background-color: var(--themeColor) !important;
+  color: white !important;
+}
+
+/* Sidebar Styling End */
+
+/* Table Styling Start */
+
+.ant-table {
+  background-color: #e5f3f7 !important;
+  font-family: 'Poppins-Regular' !important;
+}
+
+.ant-table-thead>tr>th {
+  background-color: #e5f3f7 !important;
+}
+
+.ant-table-thead .ant-table-cell {
+  border-bottom: 1px ridge rgba(45, 45, 45, 0.3) !important;
+  font-family: 'Poppins-Medium';
+}
+
+.ant-table-tbody>tr:hover>td {
+  background-color: #DBE9EC !important;
+}
+
+/* Table Styling End */
+
+.user-type>li:hover {
+  font-weight: bolder;
+}
+
+/* Modal X close icon */
+.court-modal .ant-modal-close-x {
+  color: white;
+  background-color: var(--themeColor);
+  border-radius: 50%;
+  font-size: 15px;
+  padding: 7.5px 13px;
+}
+
+/* Modal Border Radius */
+.court-modal .ant-modal-content {
+  border-radius: 10px !important;
+}
+
+.modal-button {
+  width: 120px;
+  height: 40px
+}
+
+/* image preview in court-user payment detail button */
+.ant-image-preview-operations-operation:not(:first-child) {
+  display: none;
+}
+
+/* Second Modal Styling Start */
+.second-modal .ant-modal-content {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.second-modal .ant-modal-body {
+  background-color: white;
+  border-radius: 21px;
+  width: 105%;
+}
+
+.second-modal .ant-modal-close-x {
+  font-size: 20px;
+  height: 60px;
+  width: 60px;
+  outline: none;
+}
+
+/* Second Modal Styling End */
+
+.description {
+  max-height: 3.6em;
+  /* Two lines of text with a line height of 1.8em */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: justify;
+}
+
+.description:hover {
+  max-height: none;
+  /* Show full description on hover */
+  overflow: visible;
+  white-space: normal;
+}
