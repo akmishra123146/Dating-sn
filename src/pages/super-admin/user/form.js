@@ -36,6 +36,7 @@ const UserEditForm = () => {
   const [user, setUser] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null); // NEW
 
   const fetchUser = async (userId) => {
     setLoading(true);
@@ -63,7 +64,7 @@ const UserEditForm = () => {
   const handleSubmit = async (values) => {
     setSubmitting(true);
     try {
-      const payload = { ...values, dob: values.dob?.format("YYYY-MM-DD") };
+      const payload = { ...values, dob: values.dob?.format("YYYY-MM-DD"), profile_image:avatarFile};
       const res = await ajaxService.put(`/users/`,id, payload);
       if (res?.success) {
         message.success("✅ User updated successfully");
@@ -121,6 +122,7 @@ const UserEditForm = () => {
               showUploadList={false}
               beforeUpload={(file) => {
                 setAvatarUrl(URL.createObjectURL(file));
+                setAvatarFile(file); // store file
                 return false;
               }}
             >

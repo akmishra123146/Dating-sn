@@ -127,12 +127,11 @@ class AjaxService {
 
         const headers = {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         };
 
-        if (isFormData) {
-            delete headers['Content-Type'];
+        if (!isFormData) {
+            headers['Content-Type'] = 'application/json';
         }
 
         return fetch(this.getUrl(url) + id, {
