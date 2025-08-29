@@ -164,61 +164,69 @@ const QuestionDetails = () => {
 
   return (
     <div className="p-4 md:p-6 flex justify-center">
-      <Card className="w-full max-w-5xl shadow-lg rounded-lg">
-        {/* Breadcrumb + Actions */}
-        <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-3">
-          <Breadcrumb
-            items={[
-              {
-                title: (
-                  <Link to="/dashboard">
-                    <HomeOutlined /> Home
-                  </Link>
-                ),
-              },
-              { title: <Link to="/lifestyles-questions">Questions</Link> },
-              {
-                title: data?.question ? (
-                  <span style={{ maxWidth: 200 }} className="truncate">
-                    {data.question}
-                  </span>
-                ) : (
-                  "Details"
-                ),
-              },
-            ]}
-          />
+      <div style={{ marginBottom: 15 }}>
+        <Row justify="space-between" align="middle" className="mb-6 w-full">
+          <Col flex="auto">
+            <Breadcrumb
+              items={[
+                {
+                  title: (
+                    <Link to="/dashboard">
+                      <HomeOutlined /> Home
+                    </Link>
+                  ),
+                },
+                { title: <Link to="/lifestyles-questions">Questions</Link> },
+                {
+                  title: data?.question ? (
+                    <span
+                      style={{ maxWidth: 200 }}
+                      className="truncate inline-block align-middle"
+                    >
+                      {data.question}
+                    </span>
+                  ) : (
+                    "Details"
+                  ),
+                },
+              ]}
+            />
+          </Col>
 
-          <Space wrap>
-            <Button
-              type="primary"
-              ghost
-              icon={<EditOutlined />}
-              onClick={openEditModal}
-            >
-              Edit
-            </Button>
-
-            <Popconfirm
-              title="Are you sure to delete this question?"
-              onConfirm={handleDelete}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button danger icon={<DeleteOutlined />}>
-                Delete
+          <Col flex="none">
+            <Space>
+              <Button
+                type="primary"
+                ghost
+                icon={<EditOutlined />}
+                onClick={openEditModal}
+              >
+                Edit
               </Button>
-            </Popconfirm>
 
-            <Button
-              icon={<ArrowLeftOutlined />}
-              onClick={() => history.push("/questions")}
-            >
-              Back
-            </Button>
-          </Space>
-        </div>
+              <Popconfirm
+                title="Are you sure to delete this question?"
+                onConfirm={handleDelete}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button danger icon={<DeleteOutlined />}>
+                  Delete
+                </Button>
+              </Popconfirm>
 
+              <Button
+                icon={<ArrowLeftOutlined />}
+                onClick={() => history.push("/questions")}
+              >
+                Back
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </div>
+
+      <Card className="w-full max-w-5xl shadow-lg rounded-lg">
         {/* Details */}
         <Descriptions
           title={<Title level={5}>Question Details</Title>}

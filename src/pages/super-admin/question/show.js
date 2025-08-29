@@ -111,7 +111,7 @@ const QuestionDetails = () => {
       if (response.success) {
         message.success("Question updated successfully");
         setData(response.data); // update details instantly
-         fetchData(id);
+        fetchData(id);
         setShowEditModal(false);
       } else {
         message.error("Failed to update question");
@@ -154,57 +154,61 @@ const QuestionDetails = () => {
 
   return (
     <div className="p-6 flex justify-center">
-      <Card className="w-full max-w-4xl shadow-xl rounded-lg">
-        {/* Breadcrumb + Actions */}
-        <div className="flex justify-between items-center mb-6">
-          <Breadcrumb
-            items={[
-              {
-                title: (
-                  <Link to="/dashboard">
-                    <HomeOutlined /> Home
-                  </Link>
-                ),
-              },
-              { title: <Link to="/questions">Questions</Link> },
-              {
-                title: data?.question
-                  ? `${data.question.substring(0, 20)}...`
-                  : "Details",
-              },
-            ]}
-          />
-
-          <Space>
-            <Button
-              type="primary"
-              ghost
-              icon={<EditOutlined />}
-              onClick={openEditModal}
-            >
-              Edit
-            </Button>
-
-            <Popconfirm
-              title="Are you sure to delete this question?"
-              onConfirm={handleDelete}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button danger icon={<DeleteOutlined />}>
-                Delete
+      {/* Fixed Breadcrumb + Actions Layout */}
+      <div style={{ marginBottom: 15 }}>
+        <Row justify="space-between" align="middle" className="mb-10 w-full">
+          <Col flex="auto">
+            <Breadcrumb
+              items={[
+                {
+                  title: (
+                    <Link to="/dashboard">
+                      <HomeOutlined /> Home
+                    </Link>
+                  ),
+                },
+                { title: <Link to="/questions">Questions</Link> },
+                {
+                  title: data?.question
+                    ? `${data.question.substring(0, 20)}...`
+                    : "Details",
+                },
+              ]}
+            />
+          </Col>
+          <Col flex="none">
+            <Space>
+              <Button
+                type="primary"
+                ghost
+                icon={<EditOutlined />}
+                onClick={openEditModal}
+              >
+                Edit
               </Button>
-            </Popconfirm>
 
-            <Button
-              icon={<ArrowLeftOutlined />}
-              onClick={() => history.push("/questions")}
-            >
-              Back
-            </Button>
-          </Space>
-        </div>
+              <Popconfirm
+                title="Are you sure to delete this question?"
+                onConfirm={handleDelete}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button danger icon={<DeleteOutlined />}>
+                  Delete
+                </Button>
+              </Popconfirm>
 
+              <Button
+                icon={<ArrowLeftOutlined />}
+                onClick={() => history.push("/questions")}
+              >
+                Back
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </div>
+      <Card className="w-full shadow-xl rounded-lg">
         {/* Details */}
         <Descriptions
           title="Question Details"
