@@ -53,7 +53,7 @@ const Login = ({ onLogin }) => {
 
     return (
         <div className="login-container">
-            <img src={fitMatchIcon} alt="fitmatch icon" style={{ height: '40px', marginBottom: 20 }} />
+            <img src={fitMatchIcon} alt="fitmatch icon" style={{ width : '140px', height: '140px', marginBottom: 20 }} />
             <div style={{ marginBottom: 20, textAlign: 'center' }}>
                 <Title id='title' style={{ margin: 0 }}>Sign In</Title>
                 <Text id='subtitle'>Access Portal</Text>

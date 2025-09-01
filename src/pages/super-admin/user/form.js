@@ -64,8 +64,9 @@ const UserEditForm = () => {
   const handleSubmit = async (values) => {
     setSubmitting(true);
     try {
-      const payload = { ...values, dob: values.dob?.format("YYYY-MM-DD"), profile_image:avatarFile};
+       const payload = { ...values, dob: values.dob?.format("YYYY-MM-DD") };
       const res = await ajaxService.put(`/users/`,id, payload);
+
       if (res?.success) {
         message.success("✅ User updated successfully");
         history.push(`/users/${id}`);
@@ -108,7 +109,7 @@ const UserEditForm = () => {
           className="space-y-6"
         >
           {/* Avatar Section */}
-          <div className="flex flex-col items-center gap-4 mb-6">
+          {/* <div className="flex flex-col items-center gap-4 mb-6">
             <Avatar
               size={100}
               src={avatarUrl}
@@ -122,13 +123,13 @@ const UserEditForm = () => {
               showUploadList={false}
               beforeUpload={(file) => {
                 setAvatarUrl(URL.createObjectURL(file));
-                setAvatarFile(file); // store file
-                return false;
+                setAvatarFile(file?.[0]); // store file
+                return false; // prevent auto-upload
               }}
             >
               <Button icon={<UploadOutlined />}>Change Avatar</Button>
             </Upload>
-          </div>
+          </div> */}
 
           <Row gutter={24}>
             {/* Left Column - Profile Info */}
@@ -171,10 +172,7 @@ const UserEditForm = () => {
                 </Form.Item>
 
                 <Form.Item name="bio" label="Bio">
-                  <Input.TextArea
-                    rows={3}
-                    placeholder="Write a short bio..."
-                  />
+                  <Input.TextArea rows={3} placeholder="Write a short bio..." />
                 </Form.Item>
               </Card>
             </Col>
@@ -193,7 +191,7 @@ const UserEditForm = () => {
                 <Form.Item
                   name="email"
                   label="Email"
-                  rules={[{ readonly: true, type: "email" }]}
+                  rules={[{ type: "email", message: "Invalid email" }]}
                 >
                   <Input placeholder="Enter email" />
                 </Form.Item>
@@ -201,22 +199,6 @@ const UserEditForm = () => {
                 <Form.Item name="phone" label="Phone">
                   <Input placeholder="Enter phone number" />
                 </Form.Item>
-
-                {/* <Form.Item name="roles" label="Roles">
-                  <Select mode="multiple" placeholder="Select roles">
-                    <Option value="admin">Admin</Option>
-                    <Option value="user">User</Option>
-                    <Option value="moderator">Moderator</Option>
-                  </Select>
-                </Form.Item> */}
-
-                {/* <Form.Item name="interests" label="Interests">
-                  <Select
-                    mode="tags"
-                    placeholder="Add interests"
-                    tokenSeparators={[","]}
-                  />
-                </Form.Item> */}
               </Card>
             </Col>
           </Row>

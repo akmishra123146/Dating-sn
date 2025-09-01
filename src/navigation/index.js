@@ -20,6 +20,7 @@ import CourtUserPayments from "../pages/court-user/payment";
 import Users from "../pages/super-admin/user";
 import UserDetails from "../pages/super-admin/user/show";
 import UserForm from "../pages/super-admin/user/form";
+import Profile from "../pages/super-admin/profile";
 import Payments from "../pages/super-admin/payment";
 import Courts from "../pages/super-admin/court";
 // import Events from "../pages/super-admin/events";
@@ -88,8 +89,8 @@ export default function Navigation() {
                 <Route exact path={'/reset-password'} component={() => <AuthLayout><ResetPassword /></AuthLayout>} />
 
                 <Route exact path={'/'} component={() => wrapper(MainLayout, handleComponent(AdminDashboard, CourtDashboard))} />
-                <Route exact path={'/profile'} component={() => wrapper(MainLayout, handleComponent(null, CourtUserProfile))} />
-                <Route exact path={'/users'} component={() => wrapper(MainLayout, handleComponent(Users, null))} />
+                <Route exact path={'/profile'} component={() => wrapper(MainLayout, handleComponent(Profile,null))} />
+                <Route exact path={'/users:id?'} component={() => wrapper(MainLayout, handleComponent(Users, null))} />
                 <Route exact path={'/users/:id?'} component={() => wrapper(MainLayout, handleComponent(UserDetails, null))} />
                 <Route exact path={'/users/edit/:id?'} component={() => wrapper(MainLayout, handleComponent(UserForm, null))} />
                 <Route exact path={'/payments'} component={() => wrapper(MainLayout, handleComponent(Payments, CourtUserPayments))} />
