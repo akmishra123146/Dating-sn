@@ -6,10 +6,10 @@ import { SUPER_ADMIN } from '../constants';
 import { MdOutlineDashboard } from "react-icons/md";
 import { TbUsersGroup } from "react-icons/tb";
 import { GiTennisCourt } from "react-icons/gi";
-// import { MdOutlinePayments } from "react-icons/md";
+import { MdOutlinePayments } from "react-icons/md";
 // import { LuBadgePercent } from "react-icons/lu";
 import { LiaUsersSolid } from "react-icons/lia";
-// import { FaUserCheck } from "react-icons/fa";
+import { FaUserCheck } from "react-icons/fa";
 // import { VscReferences } from "react-icons/vsc";
 
 const { Sider } = Layout;
@@ -69,12 +69,18 @@ const items = [
         icon: <LiaUsersSolid />,
         link: '/liststyle-questions'
     },
-    // {
-    //     label: 'User Verification',
-    //     key: 'user-verification',
-    //     icon: <FaUserCheck />,
-    //     link: '/user-verification'
-    // },
+    {
+        label: 'Interest',
+        key: 'interest',
+        icon: <LiaUsersSolid />,
+        link: '/interest'
+    },
+    {
+        label: 'User Verification',
+        key: 'user-verification',
+        icon: <FaUserCheck />,
+        link: '/user-verification'
+    },
     // {
     //     label: 'Help',
     //     key: 'help',

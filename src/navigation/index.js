@@ -13,6 +13,8 @@ import CourtDashboard from "../pages/court-user/courtDashboard";
 import VerifyOtp from "../pages/auth/verifyOtp";
 import Questions from "../pages/super-admin/question";
 import QuestionDetails from "../pages/super-admin/question/show";
+import Interest from "../pages/super-admin/interest";
+import InterestDetails from "../pages/super-admin/interest/show";
 import ListstyleQuestions from "../pages/super-admin/liststyle-questions";
 import ListstyleQuestionDetails from "../pages/super-admin/liststyle-questions/show";
 import CourtUserBookings from "../pages/court-user/booking";
@@ -25,10 +27,10 @@ import Payments from "../pages/super-admin/payment";
 import Courts from "../pages/super-admin/court";
 // import Events from "../pages/super-admin/events";
 // import Waitlist from "../pages/super-admin/events/waitlist";
-// import UserVerification from "../pages/super-admin/user_verification";
+import UserVerification from "../pages/super-admin/user_verification";
 import CourtUserProfile from "../pages/court-user/profile";
 import NotFound from "../pages/not-found";
-// import Memberships from "../pages/super-admin/membership-plan";
+import Memberships from "../pages/super-admin/membership-plan";
 
 const AuthRedirect = ({ destination }) => {
     return <Route render={(props) => (<Redirect to={{ pathname: destination, state: { from: props.location } }} />)} />
@@ -103,8 +105,10 @@ export default function Navigation() {
                 <Route exact path={'/questions/:id?'} component={() => wrapper(MainLayout, handleComponent(QuestionDetails, null))} />
                 <Route exact path={'/liststyle-questions'} component={() => wrapper(MainLayout, handleComponent(ListstyleQuestions, null))} />
                 <Route exact path={'/liststyle-questions/:id?'} component={() => wrapper(MainLayout, handleComponent(ListstyleQuestionDetails, null))} />
-                {/* <Route exact path={'/user-verification'} component={() => wrapper(MainLayout, handleComponent(UserVerification, null))} />
-                <Route exact path={'/membership-plans'} component={() => wrapper(MainLayout, handleComponent(Memberships, null))} /> */}
+                <Route exact path={'/interest'} component={() => wrapper(MainLayout, handleComponent(Interest, null))} />
+                <Route exact path={'/interest/:id?'} component={() => wrapper(MainLayout, handleComponent(InterestDetails, null))} />
+                <Route exact path={'/user-verification'} component={() => wrapper(MainLayout, handleComponent(UserVerification, null))} />
+                <Route exact path={'/membership-plans'} component={() => wrapper(MainLayout, handleComponent(Memberships, null))} />
 
                 <Route path="*" component={() => handleNotFound(NotFound)} />
             </Switch>
