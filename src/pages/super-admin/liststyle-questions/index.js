@@ -4,6 +4,7 @@ import {
   DeleteOutlined,
   EyeOutlined,
   EditOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -16,6 +17,7 @@ import {
   Table,
   Typography,
   notification,
+  Upload,
 } from "antd";
 import { useEffect, useState } from "react";
 import ajaxService from "../../../services/ajax-service";
@@ -32,9 +34,11 @@ const ListstyleQuestions = () => {
 
   const [dataSource, setDataSource] = useState({});
   const [questionType, setQuestionType] = useState(2);
-  const [options, setOptions] = useState([{ id: 1, option: "" }]);
-  const [optionErrors, setOptionErrors] = useState([]);
+  const [options, setOptions] = useState([{ id: "new_0", option: "" }]);
+  const [optionErrors, setOptionErrors] = useState([false]);
   const [editId, setEditId] = useState(null); // <-- track edit mode
+  const [fileList, setFileList] = useState([]);
+  const [originalImageUrl, setOriginalImageUrl] = useState(null);
 
   // ---------- Options Handlers ----------
   const handleAddOption = () => {
@@ -46,7 +50,8 @@ const ListstyleQuestions = () => {
       return;
     }
 
-    setOptions([...options, { id: options.length + 1, option: "" }]);
+    const newId = `new_${Date.now()}`;
+    setOptions([...options, { id: newId, option: "" }]);
     setOptionErrors([...optionErrors, false]);
   };
 
@@ -69,6 +74,21 @@ const ListstyleQuestions = () => {
 
   // ---------- Table Columns ----------
   const columns = [
+    {
+      title: "Image",
+      key: "image",
+      render: (_, record) => (
+        record.image_url ? (
+          <img
+            src={record.image_url}
+            alt="Lifestyle Question"
+            style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 4 }}
+          />
+        ) : (
+          <span>No Image</span>
+        )
+      ),
+    },
     {
       title: "Lifestyle Question",
       dataIndex: "question",
@@ -139,16 +159,48 @@ const ListstyleQuestions = () => {
     setEditId(record.id);
     setShowModal(true);
     setQuestionType(record.options_type);
+    setOriginalImageUrl(record.image_url);
 
     form.setFieldsValue({
       type: record.options_type,
       question: record.question,
     });
 
-    if (record.options_type === 1 && record.question_options?.length) {
-      setOptions(record.question_options.map((opt, i) => ({ id: i + 1, option: opt.option })));
+    setFileList(
+      record.image_url
+        ? [
+            {
+              uid: `-1`,
+              name: "image",
+              status: "done",
+              url: record.image_url,
+            },
+          ]
+        : []
+    );
+
+    let newOptions = [];
+    if (record.options_type === 1) {
+      if (record.question_options?.length) {
+        newOptions = record.question_options.map((opt) => ({ id: opt.id, option: opt.option }));
+      } else {
+        const newId = `new_${Date.now()}`;
+        newOptions = [{ id: newId, option: "" }];
+      }
     } else {
-      setOptions([{ id: 1, option: "" }]);
+      newOptions = [];
+    }
+    setOptions(newOptions);
+    setOptionErrors(new Array(newOptions.length).fill(false));
+  };
+
+  const handleTypeChange = (e) => {
+    const newType = Number(e.target.value);
+    setQuestionType(newType);
+    if (newType === 1 && options.length === 0) {
+      const newId = `new_${Date.now()}`;
+      setOptions([{ id: newId, option: "" }]);
+      setOptionErrors([false]);
     }
   };
 
@@ -166,17 +218,32 @@ const ListstyleQuestions = () => {
       }
     }
 
-    const payload = {
-      question: values.question,
-      options_type: questionType,
-      ...(questionType === 1 && {
-        question_options: options.filter((opt) => opt.option.trim() !== ""),
-      }),
-    };
+    const formData = new FormData();
+    formData.append("question", values.question);
+    formData.append("options_type", questionType);
+
+    if (questionType === 1) {
+      const filteredOptions = options.filter((opt) => opt.option.trim() !== "");
+      filteredOptions.forEach((opt, idx) => {
+        formData.append(`question_options[${idx}][option]`, opt.option);
+        if (opt.id && !String(opt.id).startsWith("new_")) {
+          formData.append(`question_options[${idx}][id]`, opt.id);
+        }
+      });
+    }
+
+    const hasNewFile = fileList.some((file) => file.originFileObj);
+    const shouldRemoveImage = editId && originalImageUrl && fileList.length === 0;
+    const shouldKeepImage = editId && !hasNewFile && fileList.length > 0;
+
+    if (hasNewFile) {
+      const newFile = fileList.find((file) => file.originFileObj);
+      formData.append("image", newFile.originFileObj);
+    } 
 
     const response = editId
-      ? await ajaxService.put(`/lifestyles/`,editId, payload)
-      : await ajaxService.post("/lifestyles", payload);
+      ? await ajaxService.postFormData(`/update-lifestyle/`, editId, formData)
+      : await ajaxService.post("/lifestyles", formData);
 
     if (response.success) {
       handleCancel();
@@ -232,7 +299,10 @@ const ListstyleQuestions = () => {
   const handleCancel = () => {
     setShowModal(false);
     setEditId(null);
-    setOptions([{ id: 1, option: "" }]);
+    setOriginalImageUrl(null);
+    setOptions([{ id: "new_0", option: "" }]);
+    setOptionErrors([false]);
+    setFileList([]);
     form.resetFields();
   };
 
@@ -268,7 +338,7 @@ const ListstyleQuestions = () => {
               >
                 <select
                   style={{ width: "100%", height: "35px", borderRadius: "4px" }}
-                  onChange={(e) => setQuestionType(Number(e.target.value))}
+                  onChange={handleTypeChange}
                 >
                   <option value={2}>Simple Question (No Options)</option>
                   <option value={1}>Question With Options</option>
@@ -289,13 +359,34 @@ const ListstyleQuestions = () => {
             </Col>
           </Row>
 
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item label={<b>Question Image</b>}>
+                <Upload
+                  listType="picture-card"
+                  fileList={fileList}
+                  onChange={({ fileList: newFileList }) => setFileList(newFileList)}
+                  beforeUpload={() => false}
+                  rules={[{ required: true, message: "Please select image" }]}
+                >
+                  {fileList.length < 1 && (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload Image</div>
+                    </div>
+                  )}
+                </Upload>
+              </Form.Item>
+            </Col>
+          </Row>
+
           {questionType === 1 && (
             <>
               <Title level={5} style={{ marginTop: 10 }}>
                 Options
               </Title>
               {options.map((item, index) => (
-                <Row key={index} gutter={8} style={{ marginBottom: 8 }}>
+                <Row key={item.id} gutter={8} style={{ marginBottom: 8 }}>
                   <Col span={20}>
                     <Input
                       placeholder={`Option ${index + 1}`}

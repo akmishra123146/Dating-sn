@@ -119,6 +119,46 @@ class AjaxService {
             })
     }
 
+    async postFormData(url, id,data = null) {
+
+        const token = localStorage.getItem('token');
+        const isFormData = data instanceof FormData;
+
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        if (isFormData) {
+            delete headers['Content-Type'];
+        }
+
+        return fetch(this.getUrl(url)+ id, {
+            method: 'POST',
+            headers: headers,
+            body: isFormData ? data : JSON.stringify(data)
+        })
+            .then(async (response) => {
+                if (response.ok) {
+                    return response.json()
+                } else {
+                    const result = await response.json();
+                    // if (result.message) {
+                    //     notification.open({ message: result.message, icon: <CloseCircleOutlined style={{ color: 'red' }} /> })
+                    // }
+                    return result;
+                }
+                // throw response
+            })
+            .then((result) => {
+                return result
+            })
+            .catch(error => {
+                console.error("error post data:", error)
+            })
+    }
+
     async put(url, id, data) {
 
      
