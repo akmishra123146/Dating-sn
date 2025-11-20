@@ -15,6 +15,8 @@ import Questions from "../pages/super-admin/question";
 import QuestionDetails from "../pages/super-admin/question/show";
 import Interest from "../pages/super-admin/interest";
 import InterestDetails from "../pages/super-admin/interest/show";
+import ContactUs from "../pages/super-admin/contact-us";
+import ContactUsDetails from "../pages/super-admin/contact-us/feedback";
 import ListstyleQuestions from "../pages/super-admin/liststyle-questions";
 import ListstyleQuestionDetails from "../pages/super-admin/liststyle-questions/show";
 import CourtUserBookings from "../pages/court-user/booking";
@@ -107,6 +109,7 @@ export default function Navigation() {
                 <Route exact path={'/liststyle-questions/:id?'} component={() => wrapper(MainLayout, handleComponent(ListstyleQuestionDetails, null))} />
                 <Route exact path={'/interest'} component={() => wrapper(MainLayout, handleComponent(Interest, null))} />
                 <Route exact path={'/interest/:id?'} component={() => wrapper(MainLayout, handleComponent(InterestDetails, null))} />
+                <Route exact path={'/contact-us'} component={() => wrapper(MainLayout, handleComponent(ContactUs, null))} />
                 <Route exact path={'/user-verification'} component={() => wrapper(MainLayout, handleComponent(UserVerification, null))} />
                 <Route exact path={'/membership-plans'} component={() => wrapper(MainLayout, handleComponent(Memberships, null))} />
 

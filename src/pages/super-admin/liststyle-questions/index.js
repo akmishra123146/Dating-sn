@@ -82,7 +82,12 @@ const ListstyleQuestions = () => {
           <img
             src={record.image_url}
             alt="Lifestyle Question"
-            style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 4 }}
+            style={{ 
+              width: 50, 
+              height: 50, 
+              objectFit: "contain", // Changed from "cover" to "contain" to fit the entire image without cropping
+              borderRadius: 4 
+            }}
           />
         ) : (
           <span>No Image</span>

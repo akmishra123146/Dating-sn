@@ -81,11 +81,12 @@ const items = [
         icon: <FaUserCheck />,
         link: '/user-verification'
     },
-    // {
-    //     label: 'Help',
-    //     key: 'help',
-    //     icon: <IoIosHelpCircleOutline />,
-    // },
+    {
+        label: 'Contact-us',
+        key: 'contact-us',
+        icon: <LiaUsersSolid />,
+        link: '/contact-us'
+    },
 ];
 
 const courtItems = [

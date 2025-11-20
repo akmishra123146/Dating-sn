@@ -41,6 +41,8 @@ const Users = () => {
             title: 'Phone',
             dataIndex: 'phone',
             key: 'phone',
+            width: 150,
+            render: (phone, record) => <Text >{record?.country?.country_code ? '+' + record.country.country_code + ' ' + (phone || '') : (phone || 'N/A')}</Text>,        
         },
         {
             title: 'Online Status',
