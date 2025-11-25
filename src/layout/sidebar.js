@@ -76,6 +76,12 @@ const items = [
         link: '/interest'
     },
     {
+        label: 'Broadcast',
+        key: 'broadcast',
+        icon: <LiaUsersSolid />,
+        link: '/broadcast'
+    },
+    {
         label: 'User Verification',
         key: 'user-verification',
         icon: <FaUserCheck />,
