@@ -40,9 +40,7 @@ const BroadcastNotifications = () => {
 
   const [dataSource, setDataSource] = useState({ data: [], current_page: 1, per_page: 10, total: 0 });
 
-  const [allBroadcasts, setAllBroadcasts] = useState([]);
-  const [fullBroadcasts, setFullBroadcasts] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [editingBroadcast, setEditingBroadcast] = useState(null); // for edit mode
 
@@ -79,6 +77,14 @@ const BroadcastNotifications = () => {
 
   const columns = [
     {
+      title: "SNo",
+      dataIndex: "id",
+      key: "id",
+      render: (text, record, index) => (
+        (dataSource.current_page - 1) * dataSource.per_page + index + 1
+      ),
+    },
+    {
       title: "Title",
       dataIndex: "title",
       key: "title",
@@ -96,10 +102,10 @@ const BroadcastNotifications = () => {
     },
     {
       title: "Status",
-      key: "state_id",
+      key: "status_id",
       render: (_, record) => (
-        <Tag color={getStatusColor(record.state_id)}>
-          {getStatusText(record.state_id)}
+        <Tag color={getStatusColor(record.status_id)}>
+          {getStatusText(record.status_id)}
         </Tag>
       ),
     },
@@ -107,64 +113,6 @@ const BroadcastNotifications = () => {
       title: "Sent At",
       key: "sent_at",
       render: (_, record) => <Text>{record.sent_at || 'N/A'}</Text>,
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (text, record) => (
-        <Space size="small">
-          <Link to={`/broadcast-notifications/${record.id}`}>
-            <Button
-              type="primary"
-              size="small"
-              style={{
-                background: "#C9DBD7",
-                color: "#658664",
-                fontSize: "16px",
-              }}
-            >
-              <EyeOutlined />
-            </Button>
-          </Link>
-          <Button
-            type="default"
-            size="small"
-            style={{ color: "#1890ff", fontSize: "16px" }}
-            onClick={() => openEditModal(record)}
-          >
-            <EditOutlined />
-          </Button>
-          {record.state_id !== 3 && (
-            <Button
-              type="primary"
-              size="small"
-              style={{ background: "#52c41a", fontSize: "16px" }}
-              onClick={() => handleSend(record.id)}
-            >
-              <SendOutlined />
-            </Button>
-          )}
-          <Popconfirm
-            title="Are you sure to delete this broadcast notification?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button
-              type="primary"
-              size="small"
-              style={{
-                background: "#EBDEE1",
-                color: "#FF9595",
-                fontSize: "16px",
-              }}
-              danger
-            >
-              <DeleteOutlined />
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
     },
   ];
 
@@ -178,6 +126,40 @@ const BroadcastNotifications = () => {
       console.error("Failed to fetch users:", error);
     }
   };
+
+  const fetchBroadcasts = async (page = 1, search = '') => {
+    try {
+      const params = new URLSearchParams();
+      if (search.trim()) {
+        params.append('search', search.trim());
+      }
+      params.append('page', page.toString());
+      params.append('per_page', pageSize.toString());
+
+      const queryString = params.toString();
+      console.log('Search payload (query params):', queryString); // Debug log to verify search param is included
+
+      const response = await ajaxService.get(`/broad-cast-notifications?${queryString}`);
+      if (response.success) {
+        setDataSource({
+          data: response.data.data || [],
+          current_page: response.data.current_page || page,
+          per_page: response.data.per_page || pageSize,
+          total: response.data.total || 0
+        });
+      } else {
+        setDataSource({ data: [], current_page: 1, per_page: pageSize, total: 0 });
+      }
+    } catch (error) {
+      console.error("Failed to fetch broadcasts:", error);
+      setDataSource({ data: [], current_page: 1, per_page: pageSize, total: 0 });
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    fetchBroadcasts(1, '');
+  }, []);
 
   const onFinish = async (values) => {
     let response;
@@ -194,19 +176,21 @@ const BroadcastNotifications = () => {
     } else if (selectedUsers.length > 0) {
       recipients = selectedUsers;
     }
-    formData.append('recipients', JSON.stringify(recipient));
+    recipients.forEach(recipient => {
+      formData.append('recipients[]', recipient);
+    });
 
     if (editingBroadcast) {
       // update with FormData
-      response = await ajaxService.put('/broadcast-notifications/', editingBroadcast.id, formData, true); // true for FormData
+      response = await ajaxService.put('/broad-cast-notifications/', editingBroadcast.id, formData, true); // true for FormData
     } else {
       // create
-      response = await ajaxService.post("/broadcast-notifications", formData, true);
+      response = await ajaxService.post("/broad-cast-notifications", formData, true);
     }
 
     if (response.success) {
       handleCancel();
-      initialize();
+      fetchBroadcasts(dataSource.current_page, searchTerm);
       notification.open({
         message: response.message || (editingBroadcast ? "Broadcast updated successfully!" : "Broadcast added successfully!"),
         icon: <CheckCircleOutlined style={{ color: "#108ee9" }} />,
@@ -242,7 +226,7 @@ const BroadcastNotifications = () => {
           message: `Broadcast sent successfully!`,
           icon: <CheckCircleOutlined style={{ color: "green" }} />,
         });
-        initialize();
+        fetchBroadcasts(dataSource.current_page, searchTerm);
       } else {
         notification.open({
           message: "Unable to send broadcast.",
@@ -259,13 +243,13 @@ const BroadcastNotifications = () => {
   };
 
   const handleDelete = async (id) => {
-    const response = await ajaxService.delete('/broadcast-notifications/', id);
+    const response = await ajaxService.delete('/broad-cast-notifications/', id);
     if (response.success) {
       notification.open({
         message: `Broadcast deleted successfully!`,
         icon: <CheckCircleOutlined style={{ color: "green" }} />,
       });
-      initialize();
+      fetchBroadcasts(dataSource.current_page, searchTerm);
     } else {
       notification.open({
         message: "Unable to delete broadcast.",
@@ -279,94 +263,15 @@ const BroadcastNotifications = () => {
   };
 
   const handleSearch = ({ search }) => {
-    const query = search ? search.toLowerCase().trim() : '';
-    if (!query) {
-      setAllBroadcasts(fullBroadcasts);
-      setCurrentPage(1);
-      const start = 0;
-      const end = pageSize;
-      const sliced = fullBroadcasts.slice(start, end);
-      setDataSource({
-        data: sliced,
-        current_page: 1,
-        per_page: pageSize,
-        total: fullBroadcasts.length
-      });
-      return;
-    }
-
-    const filtered = fullBroadcasts.filter(broadcast =>
-      broadcast.title.toLowerCase().includes(query) ||
-      broadcast.message.toLowerCase().includes(query)
-    );
-
-    if (filtered.length === 0) {
-      notification.open({
-        message: `${search} is not found!`,
-        icon: <CloseCircleOutlined style={{ color: "red" }} />,
-      });
-      setAllBroadcasts(fullBroadcasts);
-      setCurrentPage(1);
-      const start = 0;
-      const end = pageSize;
-      const sliced = fullBroadcasts.slice(start, end);
-      setDataSource({
-        data: sliced,
-        current_page: 1,
-        per_page: pageSize,
-        total: fullBroadcasts.length
-      });
-      return;
-    }
-
-    setAllBroadcasts(filtered);
-    setCurrentPage(1);
-    const start = 0;
-    const end = pageSize;
-    const sliced = filtered.slice(start, end);
-    setDataSource({
-      data: sliced,
-      current_page: 1,
-      per_page: pageSize,
-      total: filtered.length
-    });
+    const query = search ? search.trim() : '';
+    console.log('Search term:', query); // Debug log to verify search input
+    setSearchTerm(query);
+    fetchBroadcasts(1, query);
   };
 
   const handleChangePage = (page) => {
-    setCurrentPage(page);
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-    const sliced = allBroadcasts.slice(start, end);
-    setDataSource({
-      data: sliced,
-      current_page: page,
-      per_page: pageSize,
-      total: allBroadcasts.length
-    });
+    fetchBroadcasts(page, searchTerm);
   };
-
-  const initialize = async () => {
-    const response = await ajaxService.get("/broadcast-notifications");
-    if (response.success) {
-      const broadcasts = response.data.data || response.data || [];
-      setFullBroadcasts(broadcasts);
-      setAllBroadcasts(broadcasts);
-      setCurrentPage(1);
-      const start = 0;
-      const end = pageSize;
-      const sliced = broadcasts.slice(start, end);
-      setDataSource({
-        data: sliced,
-        current_page: 1,
-        per_page: pageSize,
-        total: broadcasts.length
-      });
-    }
-  };
-
-  useEffect(() => {
-    initialize();
-  }, []);
 
   const handleCancel = () => {
     setShowModal(false);

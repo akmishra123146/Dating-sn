@@ -37,6 +37,9 @@ const Questions = () => {
 
   const [editingQuestion, setEditingQuestion] = useState(null); // <-- for edit mode
 
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
+
   const handleAddOption = () => {
     const hasEmpty = options.some((opt) => !opt.option.trim());
     if (hasEmpty) {
@@ -67,6 +70,14 @@ const Questions = () => {
   };
 
   const columns = [
+    {
+      title: "SNo",
+      dataIndex: "id",
+      key: "id",
+      render: (text, record, index) => (
+        (dataSource.current_page - 1) * dataSource.per_page + index + 1
+      ),
+    },
     {
       title: "Question",
       dataIndex: "question",
@@ -108,7 +119,7 @@ const Questions = () => {
               fontSize: "16px",
             }}
             danger
-            onClick={() => openDeleteModal(record.id)}
+            onClick={() => handleDeleteClick(record.id)}
           >
             <DeleteOutlined />
           </Button>
@@ -116,6 +127,39 @@ const Questions = () => {
       ),
     },
   ];
+
+  const handleDeleteClick = (id) => {
+    setQuestionToDelete(id);
+    setDeleteModalVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (questionToDelete) {
+      try {
+        const response = await ajaxService.delete(`/questions/${questionToDelete}`);
+        if (response.success) {
+          notification.open({
+            message: `Question deleted successfully!`,
+            icon: <CheckCircleOutlined style={{ color: "green" }} />,
+          });
+          initialize();
+        } else {
+          notification.open({
+            message: "Unable to delete question.",
+            icon: <CloseCircleOutlined style={{ color: "red" }} />,
+          });
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        notification.open({
+          message: "Unable to delete question.",
+          icon: <CloseCircleOutlined style={{ color: "red" }} />,
+        });
+      }
+    }
+    setDeleteModalVisible(false);
+    setQuestionToDelete(null);
+  };
 
   const onFinish = async (values) => {
     if (questionType === 1) {
@@ -177,22 +221,6 @@ const Questions = () => {
       setOptions(record.question_options);
     } else {
       setOptions([{ id: 1, option: "" }]);
-    }
-  };
-
-  const openDeleteModal = async (id) => {
-    const response = await ajaxService.delete(`/questions/${id}`);
-    if (response.success) {
-      notification.open({
-        message: `Question deleted successfully!`,
-        icon: <CheckCircleOutlined style={{ color: "green" }} />,
-      });
-      initialize();
-    } else {
-      notification.open({
-        message: "Unable to delete question.",
-        icon: <CloseCircleOutlined style={{ color: "red" }} />,
-      });
     }
   };
 
@@ -376,6 +404,17 @@ const Questions = () => {
         }}
       />
       {renderModal}
+      <Modal
+        title="Confirm Delete"
+        open={deleteModalVisible}
+        onOk={handleConfirmDelete}
+        onCancel={() => setDeleteModalVisible(false)}
+        okText="Delete"
+        cancelText="Cancel"
+        okType="danger"
+      >
+        <p>Are you sure you want to delete this question? This action cannot be undone.</p>
+      </Modal>
     </>
   );
 };

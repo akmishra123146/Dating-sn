@@ -1,14 +1,17 @@
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import {
+  Button,
   Col,
   Row,
   Space,
   Table,
   Typography,
   notification,
+  Modal,
 } from "antd";
 import { useEffect, useState } from "react";
 import ajaxService from "../../../services/ajax-service";
@@ -18,15 +21,21 @@ const { Text, Title } = Typography;
 
 const ContactUs = () => {
   const [dataSource, setDataSource] = useState({ data: [], current_page: 1, per_page: 10, total: 0 });
-  const [type, setType] = useState(1)
+  const [type, setType] = useState(1);
+  const [filter, setFilter] = useState('');
 
-  const [allContacts, setAllContacts] = useState([]);
-  const [fullContacts, setFullContacts] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const pageSize = 10;
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [contactToDelete, setContactToDelete] = useState(null);
 
   const columns = [
+    {
+      title: "SNo",
+      dataIndex: "id",
+      key: "id",
+      render: (text, record, index) => (
+        (dataSource.current_page - 1) * dataSource.per_page + index + 1
+      ),
+    },
     {
       title: "Name",
       dataIndex: "user",
@@ -43,7 +52,7 @@ const ContactUs = () => {
       title: "Phone",
       dataIndex: "user",
       key: "phone",
-      render: (user) => <Text>{'+'+ user?.country_code + ' ' + user?.phone || 'N/A'}</Text>,
+      render: (user) => <Text>{user && user.country_code && user.phone ? `+${user.country_code} ${user.phone}` : 'N/A'}</Text>,
     },
     {
       title: "Purpose",
@@ -69,102 +78,100 @@ const ContactUs = () => {
       key: "created_at",
       render: (created_at) => <Text>{new Date(created_at).toLocaleDateString()}</Text>,
     },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (text, record) => (
+        <Space size="small">
+          <Button
+            type="primary"
+            size="small"
+            style={{ background: "#EBDEE1", color: "#FF9595", fontSize: "16px" }}
+            danger
+            onClick={() => handleDeleteClick(record.id)}
+          >
+            <DeleteOutlined />
+          </Button>
+        </Space>
+      ),
+    },
   ];
 
-  const handleSearch = ({ subject }) => {
-    const query = subject ? subject.toLowerCase().trim() : '';
-    if (!query) {
-      setAllContacts(fullContacts);
-      setCurrentPage(1);
-      const start = 0;
-      const end = pageSize;
-      const sliced = fullContacts.slice(start, end);
-      setDataSource({
-        data: sliced,
-        current_page: 1,
-        per_page: pageSize,
-        total: fullContacts.length
-      });
-      return;
-    }
-
-    const filtered = fullContacts.filter(contact =>
-      contact.subject.toLowerCase().includes(query) ||
-      contact.purpose.toLowerCase().includes(query) ||
-      contact.user?.name?.toLowerCase().includes(query)
-    );
-
-    if (filtered.length === 0) {
-      notification.open({
-        message: `${subject} is not found!`,
-        icon: <CloseCircleOutlined style={{ color: "red" }} />,
-      });
-      setAllContacts(fullContacts);
-      setCurrentPage(1);
-      const start = 0;
-      const end = pageSize;
-      const sliced = fullContacts.slice(start, end);
-      setDataSource({
-        data: sliced,
-        current_page: 1,
-        per_page: pageSize,
-        total: fullContacts.length
-      });
-      return;
-    }
-
-    setAllContacts(filtered);
-    setCurrentPage(1);
-    const start = 0;
-    const end = pageSize;
-    const sliced = filtered.slice(start, end);
-    setDataSource({
-      data: sliced,
-      current_page: 1,
-      per_page: pageSize,
-      total: filtered.length
-    });
+  const handleDeleteClick = (id) => {
+    setContactToDelete(id);
+    setDeleteModalVisible(true);
   };
 
-  const handleChangePage = (page) => {
-    setCurrentPage(page);
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-    const sliced = allContacts.slice(start, end);
-    setDataSource({
-      data: sliced,
-      current_page: page,
-      per_page: pageSize,
-      total: allContacts.length
-    });
+  const handleConfirmDelete = async () => {
+    if (contactToDelete) {
+      try {
+        const response = await ajaxService.delete('/contact-us/', contactToDelete);
+        if (response.success) {
+          notification.open({
+            message: `Contact deleted successfully!`,
+            icon: <CheckCircleOutlined style={{ color: "green" }} />,
+          });
+          fetchData(1);
+        } else {
+          notification.open({
+            message: "Unable to delete contact.",
+            icon: <CloseCircleOutlined style={{ color: "red" }} />,
+          });
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        notification.open({
+          message: "Unable to delete contact.",
+          icon: <CloseCircleOutlined style={{ color: "red" }} />,
+        });
+      }
+    }
+    setDeleteModalVisible(false);
+    setContactToDelete(null);
   };
 
-  const initialize = async (type) => {
-    const response = await ajaxService.get(`/contact-us?type=${type}`);
+  const handleSearch = async ({ name }) => {
+    const query = name ? name.trim() : '';
+    const response = await ajaxService.get(`/contact-us?type=${type}&search=${query}`);
+    const { success, data } = response;
+    console.log('response',response);
+    if (success) {
+      if (data.data.length == 0) {
+        setFilter('');
+        notification.open({ message: `${name} is not found!`, icon: <CloseCircleOutlined style={{ color: 'red' }} /> })
+      } else {
+        setFilter(query);
+      }
+      setDataSource(data);
+    }
+  };
+
+  const handleChangePage = async (page) => {
+    const response = await ajaxService.get(`/contact-us?type=${type}&search=${filter}&page=${page}`);
     if (response.success) {
-      const contacts = response.data.data || response.data || [];
-      setFullContacts(contacts);
-      setAllContacts(contacts);
-      setCurrentPage(1);
-      const start = 0;
-      const end = pageSize;
-      const sliced = contacts.slice(start, end);
-      setDataSource({
-        data: sliced,
-        current_page: 1,
-        per_page: pageSize,
-        total: contacts.length
-      });
+      setDataSource(response.data);
     }
   };
 
-  const onClick = (type) => {
-    setType(type);
+  const fetchData = async (page = 1) => {
+    const response = await ajaxService.get(`/contact-us?type=${type}&search=${filter}&page=${page}`);
+    if (response.success) {
+      setDataSource(response.data);
+    }
+  };
+
+  const onClick = async (newType) => {
+    setFilter('');
+    setType(newType);
+    const response = await ajaxService.get(`/contact-us?type=${newType}&search=`);
+    if (response.success) {
+      setDataSource(response.data);
+    }
   };
 
   useEffect(() => {
-    initialize(type);
-  }, [type]);
+    fetchData(1);
+  }, []);
 
   return (
     <>
@@ -189,6 +196,17 @@ const ContactUs = () => {
           showSizeChanger: false,
         }}
       />
+      <Modal
+        title="Confirm Delete"
+        open={deleteModalVisible}
+        onOk={handleConfirmDelete}
+        onCancel={() => setDeleteModalVisible(false)}
+        okText="Delete"
+        cancelText="Cancel"
+        okType="danger"
+      >
+        <p>Are you sure you want to delete this contact? This action cannot be undone.</p>
+      </Modal>
     </>
   );
 };

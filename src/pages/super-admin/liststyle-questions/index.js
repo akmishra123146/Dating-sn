@@ -40,6 +40,9 @@ const ListstyleQuestions = () => {
   const [fileList, setFileList] = useState([]);
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
 
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
+
   // ---------- Options Handlers ----------
   const handleAddOption = () => {
     const hasEmpty = options.some((opt) => !opt.option.trim());
@@ -74,6 +77,14 @@ const ListstyleQuestions = () => {
 
   // ---------- Table Columns ----------
   const columns = [
+    {
+      title: "SNo",
+      dataIndex: "id",
+      key: "id",
+      render: (text, record, index) => (
+        (dataSource.current_page - 1) * dataSource.per_page + index + 1
+      ),
+    },
     {
       title: "Image",
       key: "image",
@@ -137,7 +148,7 @@ const ListstyleQuestions = () => {
               fontSize: "16px",
             }}
             danger
-            onClick={() => openDeleteModal(record.id)}
+            onClick={() => handleDeleteClick(record.id)}
           >
             <DeleteOutlined />
           </Button>
@@ -147,17 +158,39 @@ const ListstyleQuestions = () => {
   ];
 
   // ---------- CRUD ----------
-  const openDeleteModal = async (id) => {
-    const response = await ajaxService.delete(`/lifestyles/`, id);
+  const handleDeleteClick = (id) => {
+    setQuestionToDelete(id);
+    setDeleteModalVisible(true);
+  };
 
-    const { success } = response;
-    if (success) {
-      notification.open({
-        message: `Lifestyle Question deleted successfully!`,
-        icon: <CheckCircleOutlined style={{ color: "green" }} />,
-      });
-      initialize();
+  const handleConfirmDelete = async () => {
+    if (questionToDelete) {
+      try {
+        const response = await ajaxService.delete(`/lifestyles/`, questionToDelete);
+
+        const { success } = response;
+        if (success) {
+          notification.open({
+            message: `Lifestyle Question deleted successfully!`,
+            icon: <CheckCircleOutlined style={{ color: "green" }} />,
+          });
+          initialize();
+        } else {
+          notification.open({
+            message: "Unable to delete lifestyle question.",
+            icon: <CloseCircleOutlined style={{ color: "red" }} />,
+          });
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        notification.open({
+          message: "Unable to delete lifestyle question.",
+          icon: <CloseCircleOutlined style={{ color: "red" }} />,
+        });
+      }
     }
+    setDeleteModalVisible(false);
+    setQuestionToDelete(null);
   };
 
   const openEditModal = (record) => {
@@ -458,6 +491,17 @@ const ListstyleQuestions = () => {
         }}
       />
       {renderModal}
+      <Modal
+        title="Confirm Delete"
+        open={deleteModalVisible}
+        onOk={handleConfirmDelete}
+        onCancel={() => setDeleteModalVisible(false)}
+        okText="Delete"
+        cancelText="Cancel"
+        okType="danger"
+      >
+        <p>Are you sure you want to delete this lifestyle question? This action cannot be undone.</p>
+      </Modal>
     </>
   );
 };

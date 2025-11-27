@@ -159,6 +159,41 @@ class AjaxService {
             })
     }
 
+    async putFormData(url, id,data = null) {
+
+        const token = localStorage.getItem('token');
+        const isFormData = data instanceof FormData;
+
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        if (isFormData) {
+            delete headers['Content-Type'];
+        }
+
+        return fetch(this.getUrl(url) + id, {
+            method: 'PUT',
+            headers: headers,
+            body: isFormData ? data : JSON.stringify(data)
+        })
+            .then(async (response) => {
+                if (response.ok) {
+                    return response.json()
+                } else {
+                    const result = await response.json();
+                    return result;
+                }
+            })
+            .then(result => {
+                return result
+            }).catch(error => {
+                console.error("error put data:", error)
+            })
+    }
+
     async put(url, id, data) {
 
      

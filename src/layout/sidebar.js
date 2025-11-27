@@ -10,7 +10,7 @@ import { MdOutlinePayments } from "react-icons/md";
 // import { LuBadgePercent } from "react-icons/lu";
 import { LiaUsersSolid } from "react-icons/lia";
 import { FaUserCheck } from "react-icons/fa";
-// import { VscReferences } from "react-icons/vsc";
+import { VscReferences } from "react-icons/vsc";
 
 const { Sider } = Layout;
 
@@ -22,7 +22,7 @@ const items = [
         link: '/'
     },
     {
-        label: 'Total Users',
+        label: 'Users',
         key: 'users',
         icon: <TbUsersGroup />,
         link: '/users'

@@ -1,4 +1,4 @@
-import { Button, Space, Table, Typography, notification } from "antd";
+import { Button, Space, Table, Typography, notification, Modal } from "antd";
 import { useHistory ,Link } from "react-router-dom";
 import { EditOutlined, DeleteOutlined, CloseCircleOutlined ,CheckCircleOutlined, EyeOutlined} from '@ant-design/icons';
 import { useEffect, useState } from "react";
@@ -20,12 +20,18 @@ const Users = () => {
     const [type, setType] = useState(FREE_USER)
     const [dataSource, setDataSource] = useState({});
 
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
+
     const columns = [
         
         {
-            title: 'User ID',
-            dataIndex: 'id',
-            key: 'id',
+            title: "SNo",
+            dataIndex: "id",
+            key: "id",
+            render: (text, record, index) => (
+                (dataSource.current_page - 1) * dataSource.per_page + index + 1
+            ),
         },
         {
             title: 'Name',
@@ -86,7 +92,7 @@ const Users = () => {
                         <EditOutlined />
                     </Button>
                     </Link>
-                    <Button type='primary' size="small" style={{ background: "#EBDEE1", color: '#FF9595', fontSize: '16px' }} danger onClick={() => openDeleteModal(record.id)}>
+                    <Button type='primary' size="small" style={{ background: "#EBDEE1", color: '#FF9595', fontSize: '16px' }} danger onClick={() => handleDeleteClick(record.id)}>
                         <DeleteOutlined />
                     </Button>
                 </Space>
@@ -94,17 +100,32 @@ const Users = () => {
         },
     ];
 
-    const openDeleteModal = async (id ) => {
-        console.log(id)
-        const response = await ajaxService.delete(`/users/`,id)
+    const handleDeleteClick = (id) => {
+        setUserToDelete(id);
+        setDeleteModalVisible(true);
+    };
 
-        const { success, data } = response;
-        console.log('response',response);
-        if (success) {
-            notification.open({ message: `User deleted successfully!`, icon: <CheckCircleOutlined style={{ color: 'green' }} /> })
-            initialize(type)
+    const handleConfirmDelete = async () => {
+        if (userToDelete) {
+            try {
+                const response = await ajaxService.delete(`/users/`, userToDelete);
+
+                const { success, data } = response;
+                console.log('response', response);
+                if (success) {
+                    notification.open({ message: `User deleted successfully!`, icon: <CheckCircleOutlined style={{ color: 'green' }} /> });
+                    initialize(type);
+                } else {
+                    notification.open({ message: `Failed to delete user!`, icon: <CloseCircleOutlined style={{ color: 'red' }} /> });
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                notification.open({ message: `Failed to delete user!`, icon: <CloseCircleOutlined style={{ color: 'red' }} /> });
+            }
         }
-    }
+        setDeleteModalVisible(false);
+        setUserToDelete(null);
+    };
 
     const handleSearch = async ({ name }) => {
 
@@ -175,6 +196,18 @@ const Users = () => {
                     total: dataSource.total,
                 }}
             />
+
+            <Modal
+                title="Confirm Delete"
+                open={deleteModalVisible}
+                onOk={handleConfirmDelete}
+                onCancel={() => setDeleteModalVisible(false)}
+                okText="Delete"
+                cancelText="Cancel"
+                okType="danger"
+            >
+                <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+            </Modal>
         </>
     )
 }

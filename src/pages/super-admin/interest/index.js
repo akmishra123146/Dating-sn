@@ -16,7 +16,6 @@ import {
   Table,
   Typography,
   notification,
-  Popconfirm,
 } from "antd";
 import { useEffect, useState } from "react";
 import ajaxService from "../../../services/ajax-service";
@@ -38,9 +37,20 @@ const Interests = () => {
 
   const [editingInterest, setEditingInterest] = useState(null); // for edit mode
 
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [interestToDelete, setInterestToDelete] = useState(null);
+
   const pageSize = 10;
 
   const columns = [
+    {
+      title: "SNo",
+      dataIndex: "id",
+      key: "id",
+      render: (text, record, index) => (
+        (dataSource.current_page - 1) * dataSource.per_page + index + 1
+      ),
+    },
     {
       title: "Interests",
       dataIndex: "name",
@@ -73,29 +83,56 @@ const Interests = () => {
           >
             <EditOutlined />
           </Button>
-          <Popconfirm
-            title="Are you sure to delete this interest?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+          <Button
+            type="primary"
+            size="small"
+            style={{
+              background: "#EBDEE1",
+              color: "#FF9595",
+              fontSize: "16px",
+            }}
+            danger
+            onClick={() => handleDeleteClick(record.id)}
           >
-            <Button
-              type="primary"
-              size="small"
-              style={{
-                background: "#EBDEE1",
-                color: "#FF9595",
-                fontSize: "16px",
-              }}
-              danger
-            >
-              <DeleteOutlined />
-            </Button>
-          </Popconfirm>
+            <DeleteOutlined />
+          </Button>
         </Space>
       ),
     },
   ];
+
+  const handleDeleteClick = (id) => {
+    setInterestToDelete(id);
+    setDeleteModalVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (interestToDelete) {
+      try {
+        const response = await ajaxService.delete('/interest/', interestToDelete);
+        if (response.success) {
+          notification.open({
+            message: `Interest deleted successfully!`,
+            icon: <CheckCircleOutlined style={{ color: "green" }} />,
+          });
+          initialize();
+        } else {
+          notification.open({
+            message: "Unable to delete interest.",
+            icon: <CloseCircleOutlined style={{ color: "red" }} />,
+          });
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        notification.open({
+          message: "Unable to delete interest.",
+          icon: <CloseCircleOutlined style={{ color: "red" }} />,
+        });
+      }
+    }
+    setDeleteModalVisible(false);
+    setInterestToDelete(null);
+  };
 
   const onFinish = async (values) => {
     let response;
@@ -136,22 +173,6 @@ const Interests = () => {
     form.setFieldsValue({
       name: record.name,
     });
-  };
-
-  const handleDelete = async (id) => {
-    const response = await ajaxService.delete('/interest/',id);
-    if (response.success) {
-      notification.open({
-        message: `Interest deleted successfully!`,
-        icon: <CheckCircleOutlined style={{ color: "green" }} />,
-      });
-      initialize();
-    } else {
-      notification.open({
-        message: "Unable to delete interest.",
-        icon: <CloseCircleOutlined style={{ color: "red" }} />,
-      });
-    }
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -335,6 +356,17 @@ const Interests = () => {
         }}
       />
       {renderModal}
+      <Modal
+        title="Confirm Delete"
+        open={deleteModalVisible}
+        onOk={handleConfirmDelete}
+        onCancel={() => setDeleteModalVisible(false)}
+        okText="Delete"
+        cancelText="Cancel"
+        okType="danger"
+      >
+        <p>Are you sure you want to delete this interest? This action cannot be undone.</p>
+      </Modal>
     </>
   );
 };

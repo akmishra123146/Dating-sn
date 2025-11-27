@@ -7,7 +7,7 @@ import EmailSent from "../pages/auth/emailSent";
 import ResetPassword from "../pages/auth/resetPassword";
 import MainLayout from "../layout";
 import AdminDashboard from "../pages/super-admin/adminDashboard";
-// import Referrals from "../pages/super-admin/referrals";
+import Referrals from "../pages/super-admin/referrals";
 import { COURT_USER, SUPER_ADMIN } from "../constants";
 import CourtDashboard from "../pages/court-user/courtDashboard";
 import VerifyOtp from "../pages/auth/verifyOtp";
@@ -27,6 +27,7 @@ import Users from "../pages/super-admin/user";
 import UserDetails from "../pages/super-admin/user/show";
 import UserForm from "../pages/super-admin/user/form";
 import Profile from "../pages/super-admin/profile";
+import UpdateProfile from "../pages/super-admin/updateprofile";
 import Payments from "../pages/super-admin/payment";
 import Courts from "../pages/super-admin/court";
 // import Events from "../pages/super-admin/events";
@@ -95,7 +96,8 @@ export default function Navigation() {
                 <Route exact path={'/reset-password'} component={() => <AuthLayout><ResetPassword /></AuthLayout>} />
 
                 <Route exact path={'/'} component={() => wrapper(MainLayout, handleComponent(AdminDashboard, CourtDashboard))} />
-                <Route exact path={'/profile'} component={() => wrapper(MainLayout, handleComponent(Profile,null))} />
+                <Route exact path={'/profile:id?'} component={() => wrapper(MainLayout, handleComponent(Profile,null))} />
+                <Route exact path={'/update-profile/:id?'} component={() => wrapper(MainLayout, handleComponent(UpdateProfile,null))} />
                 <Route exact path={'/users:id?'} component={() => wrapper(MainLayout, handleComponent(Users, null))} />
                 <Route exact path={'/users/:id?'} component={() => wrapper(MainLayout, handleComponent(UserDetails, null))} />
                 <Route exact path={'/users/edit/:id?'} component={() => wrapper(MainLayout, handleComponent(UserForm, null))} />
@@ -103,8 +105,8 @@ export default function Navigation() {
                 <Route exact path={'/courts'} component={() => wrapper(MainLayout, handleComponent(Courts, null))} />
                 <Route exact path={'/bookings'} component={() => wrapper(MainLayout, handleComponent(null, CourtUserBookings))} />
                 {/* <Route exact path={'/events'} component={() => wrapper(MainLayout, handleComponent(Events, null))} />
-                <Route exact path={'/events/waitlist/:id?'} component={() => wrapper(MainLayout, handleComponent(Waitlist, null))} />
-                <Route exact path={'/referrals'} component={() => wrapper(MainLayout, handleComponent(Referrals, null))} /> */}
+                <Route exact path={'/events/waitlist/:id?'} component={() => wrapper(MainLayout, handleComponent(Waitlist, null))} /> */}
+                <Route exact path={'/referrals'} component={() => wrapper(MainLayout, handleComponent(Referrals, null))} />
                 <Route exact path={'/questions'} component={() => wrapper(MainLayout, handleComponent(Questions, null))} />
                 <Route exact path={'/questions/:id?'} component={() => wrapper(MainLayout, handleComponent(QuestionDetails, null))} />
                 <Route exact path={'/liststyle-questions'} component={() => wrapper(MainLayout, handleComponent(ListstyleQuestions, null))} />

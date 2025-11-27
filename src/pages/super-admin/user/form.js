@@ -36,7 +36,7 @@ const UserEditForm = () => {
   const [user, setUser] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(null);
-  const [avatarFile, setAvatarFile] = useState(null); // NEW
+  const [avatarFile, setAvatarFile] = useState(null);
 
   const fetchUser = async (userId) => {
     setLoading(true);
@@ -48,6 +48,7 @@ const UserEditForm = () => {
         form.setFieldsValue({
           ...res.data,
           dob: res.data.dob ? dayjs(res.data.dob) : null,
+          gender: res.data.gender ? res.data.gender.toLowerCase() : undefined,
         });
       }
     } catch (err) {
@@ -64,8 +65,24 @@ const UserEditForm = () => {
   const handleSubmit = async (values) => {
     setSubmitting(true);
     try {
-       const payload = { ...values, dob: values.dob?.format("YYYY-MM-DD") };
-      const res = await ajaxService.put(`/users/`,id, payload);
+      const payload = { ...values };
+      if (values.dob) {
+        payload.dob = values.dob.format("YYYY-MM-DD");
+      }
+
+      let res;
+      if (avatarFile) {
+        // Handle file upload with FormData
+        const formData = new FormData();
+        Object.keys(payload).forEach((key) => {
+          formData.append(key, payload[key]);
+        });
+        formData.append("profile_image", avatarFile);
+        res = await ajaxService.putFormData(`/users/`, id, formData);
+      } else {
+        // Regular payload
+        res = await ajaxService.put(`/users/`, id, payload);
+      }
 
       if (res?.success) {
         message.success("✅ User updated successfully");
@@ -109,7 +126,7 @@ const UserEditForm = () => {
           className="space-y-6"
         >
           {/* Avatar Section */}
-          {/* <div className="flex flex-col items-center gap-4 mb-6">
+          <div className="flex flex-col items-center gap-4 mb-6">
             <Avatar
               size={100}
               src={avatarUrl}
@@ -122,14 +139,16 @@ const UserEditForm = () => {
               maxCount={1}
               showUploadList={false}
               beforeUpload={(file) => {
-                setAvatarUrl(URL.createObjectURL(file));
-                setAvatarFile(file?.[0]); // store file
+                const url = URL.createObjectURL(file);
+                setAvatarUrl(url);
+                setAvatarFile(file);
                 return false; // prevent auto-upload
               }}
+              accept="image/*"
             >
               <Button icon={<UploadOutlined />}>Change Avatar</Button>
             </Upload>
-          </div> */}
+          </div>
 
           <Row gutter={24}>
             {/* Left Column - Profile Info */}
@@ -159,7 +178,11 @@ const UserEditForm = () => {
                   <Input placeholder="Enter username" />
                 </Form.Item>
 
-                <Form.Item name="gender" label="Gender">
+                <Form.Item
+                  name="gender"
+                  label="Gender"
+                  rules={[{ required: true, message: "Gender is required" }]}
+                >
                   <Select placeholder="Select gender">
                     <Option value="male">Male</Option>
                     <Option value="female">Female</Option>
@@ -191,7 +214,10 @@ const UserEditForm = () => {
                 <Form.Item
                   name="email"
                   label="Email"
-                  rules={[{ type: "email", message: "Invalid email" }]}
+                  rules={[
+                    { required: true, message: "Email is required" },
+                    { type: "email", message: "Invalid email format" },
+                  ]}
                 >
                   <Input placeholder="Enter email" />
                 </Form.Item>

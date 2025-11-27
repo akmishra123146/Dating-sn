@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useParams, useHistory } from "react-router-dom"; // v5
+import { useParams, useHistory,Link } from "react-router-dom"; // v5
 import ajaxService from "../../services/ajax-service";
 import dayjs from "dayjs";
 import {
@@ -145,7 +145,7 @@ const UserDetails = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     if (id) fetchUser(id);
@@ -194,9 +194,16 @@ const UserDetails = () => {
           className="w-full max-w-6xl mx-auto rounded-2xl shadow-lg"
           title={<span className="text-xl font-semibold">Profile Details</span>}
           extra={
+            <>
+            <Link to={`/update-profile/${user?.id}`}>
+                    <Button type='primary' style={{ background: "#ebf1f0ff", color: '#658664', fontSize: '14px', marginRight:'5px'}} primary>
+                        Edit
+                    </Button>
+                    </Link>
             <Button icon={<ArrowLeftOutlined />} onClick={() => history.goBack()}>
               Back
             </Button>
+            </>
           }
         >
           {/* Top section with avatar + info */}
